@@ -36,10 +36,9 @@ To help resolve this missing piece we introduced two new generators:
 
 * The [CMakeToolchain](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmaketoolchain.html) generator to create a `conan_toolchain.cmake`. This file is saved after a `conan install` based on the settings and options and can be used like any other CMake toolchain:
 
-
-```bash
-$ cmake . -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
-```
+  ```bash
+  $ cmake . -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+  ```
 
 * The [CMakeDeps](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html) generator, to manage the requirements and to generate the config and/or module files we created.
 
@@ -53,7 +52,7 @@ For more information you can check the [Creating packages getting started](https
 
 ### Namespace change
 
-The imports from the new integrations are in the `conan.tools` namespace, not in the <code>conan**s**</code>.
+The imports from the new integrations are in the `conan.tools` namespace, not in the <code>conan<b>s</b></code>.
 
 ```python
 from conan.tools.cmake import CMakeToolchain, CMakeDeps
@@ -173,44 +172,40 @@ See the [full CMakeToolchain reference](https://docs.conan.io/en/latest/referenc
 
 * At the `generate()` method there are some new things you can now adjust, like adding new custom user CMake configurations besides the standard ones (Release, Debug, etc) with `cmake.configurations` and selecting the current configuration with `cmake.configuration`:
 
+  ```python
+  def generate(self):
+      cmake = CMakeDeps(self)
+      cmake.configurations.append("ReleaseShared")
+      if self.options["hello"].shared:
+          cmake.configuration = "ReleaseShared"
+      cmake.generate()
+  ```
 
-```python
-def generate(self):
-    cmake = CMakeDeps(self)
-    cmake.configurations.append("ReleaseShared")
-    if self.options["hello"].shared:
-        cmake.configuration = "ReleaseShared"
-    cmake.generate()
-```
-
-
-To elaborate on this, see the [full CMakeDeps reference](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html).
-
+  To elaborate on this, see the [full CMakeDeps reference](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html).
 
 * At the `package_info()` method, there are several [properties](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html#properties) you can configure to indicate to the generator how to behave when a consumer uses it (having a requirement to your package). Here is an example:
 
+  ```python
+  def package_info(self):
+      ...
+      # Generate MyFileName-config.cmake
+      self.cpp_info.set_property("cmake_file_name", "MyFileName")
+      # Foo:: namespace for the targets (Foo::Foo if no components)
+      self.cpp_info.set_property("cmake_target_name", "Foo")
+      # self.cpp_info.set_property("cmake_target_namespace", "Foo")  # This can be omitted as the value is the same
 
-```python
-def package_info(self):
-    ...
-    # Generate MyFileName-config.cmake
-    self.cpp_info.set_property("cmake_file_name", "MyFileName")
-    # Foo:: namespace for the targets (Foo::Foo if no components)
-    self.cpp_info.set_property("cmake_target_name", "Foo")
-    # self.cpp_info.set_property("cmake_target_namespace", "Foo")  # This can be omitted as the value is the same
+      # Foo::Var target name for the component "mycomponent"
+      self.cpp_info.components["mycomponent"].set_property("cmake_target_name", "Var")
+      # Automatically include the lib/mypkg.cmake file when calling find_package()
+      self.cpp_info.components["mycomponent"].set_property("cmake_build_modules", [os.path.join("lib", "mypkg.cmake")])
 
-    # Foo::Var target name for the component "mycomponent"
-    self.cpp_info.components["mycomponent"].set_property("cmake_target_name", "Var")
-    # Automatically include the lib/mypkg.cmake file when calling find_package()
-    self.cpp_info.components["mycomponent"].set_property("cmake_build_modules", [os.path.join("lib", "mypkg.cmake")])
+      # Skip this package when generating the files for the whole dependency tree in the consumer
+      # note: it will make useless the previous adjustements.
+      # self.cpp_info.set_property("cmake_find_mode", "none")
 
-    # Skip this package when generating the files for the whole dependency tree in the consumer
-    # note: it will make useless the previous adjustements.
-    # self.cpp_info.set_property("cmake_find_mode", "none")
-
-    # Generate both MyFileName-config.cmake and FindMyFileName.cmake
-    self.cpp_info.set_property("cmake_find_mode", "both")
-```
+      # Generate both MyFileName-config.cmake and FindMyFileName.cmake
+      self.cpp_info.set_property("cmake_find_mode", "both")
+  ```
 
 
 ### The `CMake` Build Helper
@@ -282,10 +277,9 @@ class HelloConan(ConanFile):
 ```
 
 
-
 ### The `layout()` method
 
-You can declare a <code>[layout()](https://docs.conan.io/en/latest/developing_packages/package_layout.html)</code> method in the recipe to describe the package contents, not only the final package in the cache but also the package while developing. As the package will have the same structure in the cache and in our local directory, the recipe development becomes easier, even working with editable packages out of the box.
+You can declare a [`layout()`](https://docs.conan.io/en/latest/developing_packages/package_layout.html) method in the recipe to describe the package contents, not only the final package in the cache but also the package while developing. As the package will have the same structure in the cache and in our local directory, the recipe development becomes easier, even working with editable packages out of the box.
 
 A couple of classic patterns you can avoid using the `layout()` method are the following:
 
